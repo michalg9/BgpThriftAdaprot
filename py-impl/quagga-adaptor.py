@@ -94,6 +94,32 @@ class BgpHandler:
 
         return 0
 
+    def addRouteMapToMPBGPPeer(self, ipAddress, routeMapNumber, routeMapDir='out'):
+        print "add RouteMap To Peer: " + str(ipAddress) + ", route-map number " + str(routeMapNumber) + "direction " + routeMapDir
+
+        self.connectTelnet(self.host, self.port)
+        print self.execTelnetCommand('conf t')
+        print self.execTelnetCommand('router bgp ' + str(self.asNumber))
+        print self.execTelnetCommand('address-family vpn4')
+        print self.execTelnetCommand('neighbor ' + str(ipAddress) + ' route-map ' + str(routeMapNumber) + ' ' + routeMapDir)
+        print self.execTelnetCommand('end')
+        self.closeTelnet()
+
+        return 0
+
+    def deleteRouteMapToMPBGPPeer(self, ipAddress, routeMapNumber, routeMapDir='out'):
+        print "delete RouteMap To Peer: " + str(ipAddress) + ", route-map number " + str(routeMapNumber) + "direction " + routeMapDir
+
+        self.connectTelnet(self.host, self.port)
+        print self.execTelnetCommand('conf t')
+        print self.execTelnetCommand('router bgp ' + str(self.asNumber))
+        print self.execTelnetCommand('address-family vpn4')
+        print self.execTelnetCommand('no neighbor ' + str(ipAddress) + ' route-map ' + str(routeMapNumber) + ' ' + routeMapDir)
+        print self.execTelnetCommand('end')
+        self.closeTelnet()
+
+        return 0
+
     def addVrf(self, rd, irts, erts):
         print "add vrf: rd:" + str(rd) + " irts:" + str(irts) + " erts:" + str(erts)
 
@@ -109,30 +135,31 @@ class BgpHandler:
         print "del vrf rd:" + str(rd)
         return 0
 
-    def pushRoute(self, prefix, nexthop, rd, label):
-        print "push route prefix:" + str(prefix) + " nexthop:" + str(nexthop) + " rd:" + str(rd) + " label:" + str(
-            label)
+    def pushRoute(self, aclNum, routeMapNum, prefix, wildcard):
+        seqNum = 1
+        # TODO this has to be derived as next available one !
+        print "push route prefix:" + str(prefix)
         self.connectTelnet(self.host, self.port)
         print self.execTelnetCommand('conf t')
-        print self.execTelnetCommand('router bgp ' + str(self.asNumber))
-        print self.execTelnetCommand('address-family vpnv4 unicast')
-        print self.execTelnetCommand('network ' + str(prefix) + ' rd ' + str(rd) + ' tag ' + str(label))
-
-        # TODO: add route map ?
-
+        print self.execTelnetCommand('access-list ' + str(aclNum) + ' permit ' + prefix + ' ' + wildcard)
+        print self.execTelnetCommand('route-map ' + str(routeMapNum) + ' permit ' + str(seqNum))
+        print self.execTelnetCommand('match ip address ' + str(aclNum))
         print self.execTelnetCommand('end')
+        print self.execTelnetCommand('clear ip bgp COCOPEERS vpnv4 unicast out') #TODO addPeer must add to COCOPEERS group
+
         self.closeTelnet()
 
         return 0
 
-    def withdrawRoute(self, prefix, rd):
-        print "withdrawRoute prefix " + str(prefix) + " rd:" + str(rd)
+    def withdrawRoute(self, prefix, routeMapNum, seqNum):
+		#TODO find appropriate seqNum
+        print "withdrawRoute prefix " + str(prefix)
 
         self.connectTelnet(self.host, self.port)
         print self.execTelnetCommand('conf t')
-        print self.execTelnetCommand('router bgp ' + str(self.asNumber))
-        print self.execTelnetCommand('no network ' + str(prefix) + ' rd ' + str(rd))
+        print self.execTelnetCommand('no route-map ' + str(routeMapNum) + ' permit ' + str(seqNum))
         print self.execTelnetCommand('end')
+        print self.execTelnetCommand('clear ip bgp COCOPEERS vpnv4 unicast out') #TODO addPeer must add to COCOPEERS group
         self.closeTelnet()
 
         return 0
