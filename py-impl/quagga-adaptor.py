@@ -139,8 +139,7 @@ class BgpHandler:
 		print "del vrf rd:" + str(rd)
 		return 0
 
-	def pushRoute(self, aclNum, routeMapNum, prefix, wildcard, ipAddress):
-		seqNum = 1
+	def pushRoute(self, aclNum, routeMapNum, seqNum, prefix, wildcard, ipAddress):
 		# TODO this has to be derived as next available one !
 		print "push route prefix:" + str(prefix)
 		self.connectTelnet(self.host, self.port)
@@ -157,12 +156,13 @@ class BgpHandler:
 
 		return 0
 
-	def withdrawRoute(self, prefix, routeMapNum, seqNum, ipAddress):
+	def withdrawRoute(self, aclNum, routeMapNum, seqNum, prefix, ipAddress):
 		# TODO find appropriate seqNum using prefix
 		print "withdrawRoute prefix " + str(prefix)
 
 		self.connectTelnet(self.host, self.port)
 		print self.execTelnetCommand('conf t')
+		print self.execTelnetCommand('no access-list ' + str(aclNum))
 		print self.execTelnetCommand('no route-map ' + str(routeMapNum) + ' permit ' + str(seqNum))
 		print self.execTelnetCommand('end')
 		print self.execTelnetCommand('clear ip bgp ' + ipAddress + ' vpnv4 unicast out')
@@ -319,12 +319,12 @@ class BgpHandler:
 
 
 handler = BgpHandler()
-processor = BgpConfigurator.Processor(handler)
-transport = TSocket.TServerSocket(port=7644)
-tfactory = TTransport.TBufferedTransportFactory()
-pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+#processor = BgpConfigurator.Processor(handler)
+#transport = TSocket.TServerSocket(port=7644)
+#tfactory = TTransport.TBufferedTransportFactory()
+#pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-print "Starting python server..."
-server.serve()
+#server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+#print "Starting python server..."
+#server.serve()
 print "done!"
