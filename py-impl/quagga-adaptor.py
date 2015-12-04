@@ -139,7 +139,7 @@ class BgpHandler:
 		print "del vrf rd:" + str(rd)
 		return 0
 
-	def pushRoute(self, aclNum, routeMapNum, seqNum, prefix, wildcard, ipAddress):
+	def pushRoute(self, aclNum, routeMapNum, seqNum, prefix, wildcard, ipAddress, vpnNum):
 		# TODO this has to be derived as next available one !
 		print "push route prefix:" + str(prefix)
 		self.connectTelnet(self.host, self.port)
@@ -147,6 +147,7 @@ class BgpHandler:
 		print self.execTelnetCommand('access-list ' + str(aclNum) + ' permit ' + prefix + ' ' + wildcard)
 		print self.execTelnetCommand('route-map ' + str(routeMapNum) + ' permit ' + str(seqNum))
 		print self.execTelnetCommand('match ip address ' + str(aclNum))
+		print self.execTelnetCommand('set extcommunity rt ' + self.asNumber + ':' + str(vpnNum)) #we do not give originator AS but its BGP provider AS
 		print self.execTelnetCommand('end')
 		print self.execTelnetCommand('clear ip bgp ' + ipAddress + ' vpnv4 unicast out')
 		# TODO consider alternative solution: peer group
