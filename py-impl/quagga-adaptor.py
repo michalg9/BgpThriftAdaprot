@@ -317,8 +317,101 @@ class BgpHandler:
 			return False
 		# end match enable
 
+	def getRouteTarget(self, prefix):
+		print "get route target for prefix " + prefix
+#		routes = Routes()
+#		routes.errcode = 0
+
+#		routes.updates = []
+
+		self.connectTelnet(self.host, self.port)
+		self.tn.write("sh bgp ipv4 vpn " + prefix + '\n')
+		bgprt = self.readRouteTarget(self.tn)
+		self.closeTelnet()
+
+		print "RT: " + str(bgprt['rt'])
+
+#		for route in bgproutes:
+#			update = Update()
+#			update.type = 1
+#			update.reserved = 1
+#			update.prefixlen = int(route["mask"])
+#			update.label = int(route["label"])
+#			update.rd = route["rd"]
+#			update.prefix = route["prefix"]
+#			update.nexthop = route["nexthop"]
+
+#			routes.updates.append(update)
+
+		return bgprt
+
+	def readRouteTarget(self, f):
+		line = f.read_until('\n', 1)
+		curr_rt = []
+		while ((not self.get_RT(line)) or self.match_enable(line)):
+			line = f.read_until('\n', 1)
+
+		# endwhile
+		if ((not (line == "")) or self.match_enable(line)): #TODO [PZ] do we really need all of it?
+			curr_rt = self.get_RT(line)
+		return curr_rt
+
+		# routes = []
+		# while ((not (line == "")) or self.match_enable(line)):
+		#
+		# 	curr_as_rd = self.getAS_RD(line)
+		# 	if (curr_as_rd):
+		# 		# print "----- as=" + curr_as_rd["as"] + " rd=" + curr_as_rd["rd1"] +":" + curr_as_rd["rd2"]
+		#
+		# 		line = f.read_until('\n', 1)
+		# 		tags = self.get_tags(line)
+		# 		if (tags):
+		# 			print "----- as=" + curr_as_rd["as"] + " rd=" + curr_as_rd["rd1"] + ":" + curr_as_rd[
+		# 				"rd2"] + " intag=" + str(tags["intag"]) + " outtag=" + str(tags["outtag"])
+		# 			route = {"as": curr_as_rd, "rd": curr_as_rd["rd1"] + ":" + curr_as_rd["rd2"],
+		# 			         "label": tags["outtag"], "prefix": tags["prefix"], "mask": tags["mask"],
+		# 			         "nexthop": tags["nexthop"]}
+		# 			routes.append(route)
+		# 	# end if
+		# 	line = f.read_until('\n', 1)
+		# return routes
+
+	# end readRouteTarget
+
+	def get_RT(self, line):
+#Extended Community: RT:65031:101
+		re1 = '(Extended)'  # Word 1
+		re2 = '(\\s+)'  # White Space 1
+		re3 = '(Community:)'  # Word 2
+		re4 = '(\\s+)'
+		re5 = '(RT:)'
+		re6 = '(\\d+)'  # AS
+		re7 = '(:)'  # separator
+		re8 = '(\\d+)'
+
+		rg = re.compile(re1 + re2 + re3 + re4 + re5 + re6 + re7 + re8, re.IGNORECASE | re.DOTALL)
+		m = rg.search(line)
+		if m:
+			#word1 = m.group(1)
+			#ws1 = m.group(2)
+			#word2 = m.group(3)
+			#c1 = m.group(4)
+			#ats = m.group(5)  # TODO [PZ] what is this really ?
+			#rd1 = m.group(6)
+			#c2 = m.group(7)
+			rt1 = m.group(8)
+
+			ret_array = {"rt": rt1}
+
+			return ret_array
+		else:
+			return False
+
+	# end as rd
+
 
 handler = BgpHandler()
+handler.getRouteTarget('10.3.1.0/24')
 #processor = BgpConfigurator.Processor(handler)
 #transport = TSocket.TServerSocket(port=7644)
 #tfactory = TTransport.TBufferedTransportFactory()
