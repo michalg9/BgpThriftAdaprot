@@ -414,16 +414,17 @@ class BgpHandler:
 
 
 handler = BgpHandler()
-handler.getRouteTarget('10.2.2.0/24') #not found:prefix exists no rt, return empty string
-handler.getRouteTarget('10.3.1.0/24') # rt 101
-handler.getRouteTarget('10.5.2.0/24') #no net
+#quicktests
+#handler.getRouteTarget('10.2.2.0/24') #not found:prefix exists no rt, return empty string
+#handler.getRouteTarget('10.3.1.0/24') # rt 101
+#handler.getRouteTarget('10.5.2.0/24') #no net
 
-#processor = BgpConfigurator.Processor(handler)
-#transport = TSocket.TServerSocket(port=7644)
-#tfactory = TTransport.TBufferedTransportFactory()
-#pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+processor = BgpConfigurator.Processor(handler)
+transport = TSocket.TServerSocket(port=7644)
+tfactory = TTransport.TBufferedTransportFactory()
+pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-#server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-#print "Starting python server..."
-#server.serve()
+server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+print "Starting python server..."
+server.serve()
 print "done!"
