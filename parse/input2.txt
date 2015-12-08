@@ -1,0 +1,9 @@
+tn-ce2# sh bgp ipv4 vpn tags
+   Network          Next Hop      In tag/Out tag
+Route Distinguisher: as2 65021:1
+*> 10.2.1.0/24      10.2.0.254      notag/210
+Route Distinguisher: as2 65022:1
+*> 10.2.2.0/24      0.0.0.0         123/220
+
+Displayed 2 out of 2 total prefixes
+tn-ce2# 

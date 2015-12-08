@@ -1,0 +1,32 @@
+tn-ce2# 
+BGP table version is 0, local router ID is 10.2.0.2
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal
+Origin codes: i - IGP, e - EGP, ? - incomplete
+
+   Network          Next Hop            Metric LocPrf Weight Path
+Route Distinguisher: as2 65021:1
+*> 10.2.1.0/24      10.2.0.254                       0 65020 65021 i
+Route Distinguisher: as2 65022:1
+*> 10.2.2.0/24      ::         0          32768 i
+
+Displayed 2 out of 2 total prefixes
+tn-ce2# 
+asdfhasdf
+asdf
+asd
+f
+asdf
+asdf
+asd
+fasd
+f
+asdf
+asf
+asd
+
+asdf
+asd
+asdf
+Route Distinguisher: as2 65021:1
+*> 10.2.1.0/24      10.2.0.254                       0 65020 65021 i
+
