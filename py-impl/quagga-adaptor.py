@@ -307,7 +307,7 @@ class BgpHandler:
 	def match_enable(self, line):
 
 		re1 = '.*?'  # Non-greedy match on filler
-		re2 = '(#)'  # Any Single Character 1
+		re2 = '(#\\s$)'  # PZ: prompt actually ends with '# ', leaving # only is dangerous
 
 		rg = re.compile(re1 + re2, re.IGNORECASE | re.DOTALL)
 		m = rg.search(line)
@@ -330,7 +330,7 @@ class BgpHandler:
 		bgprt = self.readRouteTarget(self.tn)
 		self.closeTelnet()
 
-		print "RT: " + str(bgprt['rt'])
+		print "RT: " + bgprt
 
 #		for route in bgproutes:
 #			update = Update()
@@ -348,13 +348,16 @@ class BgpHandler:
 
 	def readRouteTarget(self, f):
 		line = f.read_until('\n', 1)
-		curr_rt = []
-		while ((not self.get_RT(line)) or self.match_enable(line)):
+		curr_rt = ''
+		while not self.match_enable(line):
+			curr_rt = self.get_RT(line)
+			if not (curr_rt==''):
+				break
 			line = f.read_until('\n', 1)
 
 		# endwhile
-		if ((not (line == "")) or self.match_enable(line)): #TODO [PZ] do we really need all of it?
-			curr_rt = self.get_RT(line)
+		#if ((not (line == "")) or self.match_enable(line)): #TODO [PZ] do we really need all of it?
+
 		return curr_rt
 
 		# routes = []
@@ -381,6 +384,9 @@ class BgpHandler:
 
 	def get_RT(self, line):
 #Extended Community: RT:65031:101
+
+		rt=''
+
 		re1 = '(Extended)'  # Word 1
 		re2 = '(\\s+)'  # White Space 1
 		re3 = '(Community:)'  # Word 2
@@ -393,26 +399,25 @@ class BgpHandler:
 		rg = re.compile(re1 + re2 + re3 + re4 + re5 + re6 + re7 + re8, re.IGNORECASE | re.DOTALL)
 		m = rg.search(line)
 		if m:
-			#word1 = m.group(1)
-			#ws1 = m.group(2)
-			#word2 = m.group(3)
-			#c1 = m.group(4)
-			#ats = m.group(5)  # TODO [PZ] what is this really ?
-			#rd1 = m.group(6)
-			#c2 = m.group(7)
-			rt1 = m.group(8)
+			rt = m.group(8)
 
-			ret_array = {"rt": rt1}
-
-			return ret_array
 		else:
-			return False
+			re1 = '(Network not in table)'
+			rg = re.compile(re1, re.IGNORECASE | re.DOTALL)
+			m = rg.search(line)
+			if m:
+				rt = m.group(1)
+		#otherwise return empty string (prefix exists but has no route target)
+		return rt
 
 	# end as rd
 
 
 handler = BgpHandler()
-handler.getRouteTarget('10.3.1.0/24')
+handler.getRouteTarget('10.2.2.0/24') #not found:prefix exists no rt, return empty string
+handler.getRouteTarget('10.3.1.0/24') # rt 101
+handler.getRouteTarget('10.5.2.0/24') #no net
+
 #processor = BgpConfigurator.Processor(handler)
 #transport = TSocket.TServerSocket(port=7644)
 #tfactory = TTransport.TBufferedTransportFactory()
