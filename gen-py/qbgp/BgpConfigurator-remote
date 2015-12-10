@@ -27,12 +27,12 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print '  i32 stopBgpServer()'
   print '  i32 createPeer(string neighborIpAddress, i32 asNumber)'
   print '  i32 deletePeer(string neighborIpAddress)'
-  print '  i32 addRouteMapToMPBGPPeer(string neighborIpAddress, i32 routeMapNumber)'
-  print '  i32 deleteRouteMapToMPBGPPeer(string neighborIpAddress, i32 routeMapNumber)'
+  print '  i32 addRouteMapToMPBGPPeer(string neighborIpAddress)'
+  print '  i32 deleteRouteMapToMPBGPPeer(string neighborIpAddress)'
   print '  i32 addVrf(string rd,  irts,  erts)'
   print '  i32 delVrf(string rd)'
-  print '  i32 pushRoute(i32 aclNum, i32 routeMapNum, i32 seqNum, string prefix, string wildcard, string neighborIpAddress, i32 vpnNum)'
-  print '  i32 withdrawRoute(i32 aclNum, i32 routeMapNum, i32 seqNum, string prefix, string neighborIpAddress)'
+  print '  i32 pushRoute(string prefix, i32 vpnNum, string neighborIpAddress)'
+  print '  i32 withdrawRoute(string prefix, i32 vpnNum, string neighborIpAddress)'
   print '  Routes getRoutes(i32 optype, i32 winSize)'
   print '  string getRouteTarget(string prefix)'
   print ''
@@ -111,16 +111,16 @@ elif cmd == 'deletePeer':
   pp.pprint(client.deletePeer(args[0],))
 
 elif cmd == 'addRouteMapToMPBGPPeer':
-  if len(args) != 2:
-    print 'addRouteMapToMPBGPPeer requires 2 args'
+  if len(args) != 1:
+    print 'addRouteMapToMPBGPPeer requires 1 args'
     sys.exit(1)
-  pp.pprint(client.addRouteMapToMPBGPPeer(args[0],eval(args[1]),))
+  pp.pprint(client.addRouteMapToMPBGPPeer(args[0],))
 
 elif cmd == 'deleteRouteMapToMPBGPPeer':
-  if len(args) != 2:
-    print 'deleteRouteMapToMPBGPPeer requires 2 args'
+  if len(args) != 1:
+    print 'deleteRouteMapToMPBGPPeer requires 1 args'
     sys.exit(1)
-  pp.pprint(client.deleteRouteMapToMPBGPPeer(args[0],eval(args[1]),))
+  pp.pprint(client.deleteRouteMapToMPBGPPeer(args[0],))
 
 elif cmd == 'addVrf':
   if len(args) != 3:
@@ -135,16 +135,16 @@ elif cmd == 'delVrf':
   pp.pprint(client.delVrf(args[0],))
 
 elif cmd == 'pushRoute':
-  if len(args) != 7:
-    print 'pushRoute requires 7 args'
+  if len(args) != 3:
+    print 'pushRoute requires 3 args'
     sys.exit(1)
-  pp.pprint(client.pushRoute(eval(args[0]),eval(args[1]),eval(args[2]),args[3],args[4],args[5],eval(args[6]),))
+  pp.pprint(client.pushRoute(args[0],eval(args[1]),args[2],))
 
 elif cmd == 'withdrawRoute':
-  if len(args) != 5:
-    print 'withdrawRoute requires 5 args'
+  if len(args) != 3:
+    print 'withdrawRoute requires 3 args'
     sys.exit(1)
-  pp.pprint(client.withdrawRoute(eval(args[0]),eval(args[1]),eval(args[2]),args[3],args[4],))
+  pp.pprint(client.withdrawRoute(args[0],eval(args[1]),args[2],))
 
 elif cmd == 'getRoutes':
   if len(args) != 2:

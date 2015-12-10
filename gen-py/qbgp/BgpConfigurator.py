@@ -47,19 +47,17 @@ class Iface:
     """
     pass
 
-  def addRouteMapToMPBGPPeer(self, neighborIpAddress, routeMapNumber):
+  def addRouteMapToMPBGPPeer(self, neighborIpAddress):
     """
     Parameters:
      - neighborIpAddress
-     - routeMapNumber
     """
     pass
 
-  def deleteRouteMapToMPBGPPeer(self, neighborIpAddress, routeMapNumber):
+  def deleteRouteMapToMPBGPPeer(self, neighborIpAddress):
     """
     Parameters:
      - neighborIpAddress
-     - routeMapNumber
     """
     pass
 
@@ -79,26 +77,20 @@ class Iface:
     """
     pass
 
-  def pushRoute(self, aclNum, routeMapNum, seqNum, prefix, wildcard, neighborIpAddress, vpnNum):
+  def pushRoute(self, prefix, vpnNum, neighborIpAddress):
     """
     Parameters:
-     - aclNum
-     - routeMapNum
-     - seqNum
      - prefix
-     - wildcard
-     - neighborIpAddress
      - vpnNum
+     - neighborIpAddress
     """
     pass
 
-  def withdrawRoute(self, aclNum, routeMapNum, seqNum, prefix, neighborIpAddress):
+  def withdrawRoute(self, prefix, vpnNum, neighborIpAddress):
     """
     Parameters:
-     - aclNum
-     - routeMapNum
-     - seqNum
      - prefix
+     - vpnNum
      - neighborIpAddress
     """
     pass
@@ -251,20 +243,18 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "deletePeer failed: unknown result");
 
-  def addRouteMapToMPBGPPeer(self, neighborIpAddress, routeMapNumber):
+  def addRouteMapToMPBGPPeer(self, neighborIpAddress):
     """
     Parameters:
      - neighborIpAddress
-     - routeMapNumber
     """
-    self.send_addRouteMapToMPBGPPeer(neighborIpAddress, routeMapNumber)
+    self.send_addRouteMapToMPBGPPeer(neighborIpAddress)
     return self.recv_addRouteMapToMPBGPPeer()
 
-  def send_addRouteMapToMPBGPPeer(self, neighborIpAddress, routeMapNumber):
+  def send_addRouteMapToMPBGPPeer(self, neighborIpAddress):
     self._oprot.writeMessageBegin('addRouteMapToMPBGPPeer', TMessageType.CALL, self._seqid)
     args = addRouteMapToMPBGPPeer_args()
     args.neighborIpAddress = neighborIpAddress
-    args.routeMapNumber = routeMapNumber
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
@@ -283,20 +273,18 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "addRouteMapToMPBGPPeer failed: unknown result");
 
-  def deleteRouteMapToMPBGPPeer(self, neighborIpAddress, routeMapNumber):
+  def deleteRouteMapToMPBGPPeer(self, neighborIpAddress):
     """
     Parameters:
      - neighborIpAddress
-     - routeMapNumber
     """
-    self.send_deleteRouteMapToMPBGPPeer(neighborIpAddress, routeMapNumber)
+    self.send_deleteRouteMapToMPBGPPeer(neighborIpAddress)
     return self.recv_deleteRouteMapToMPBGPPeer()
 
-  def send_deleteRouteMapToMPBGPPeer(self, neighborIpAddress, routeMapNumber):
+  def send_deleteRouteMapToMPBGPPeer(self, neighborIpAddress):
     self._oprot.writeMessageBegin('deleteRouteMapToMPBGPPeer', TMessageType.CALL, self._seqid)
     args = deleteRouteMapToMPBGPPeer_args()
     args.neighborIpAddress = neighborIpAddress
-    args.routeMapNumber = routeMapNumber
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
@@ -379,30 +367,22 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "delVrf failed: unknown result");
 
-  def pushRoute(self, aclNum, routeMapNum, seqNum, prefix, wildcard, neighborIpAddress, vpnNum):
+  def pushRoute(self, prefix, vpnNum, neighborIpAddress):
     """
     Parameters:
-     - aclNum
-     - routeMapNum
-     - seqNum
      - prefix
-     - wildcard
-     - neighborIpAddress
      - vpnNum
+     - neighborIpAddress
     """
-    self.send_pushRoute(aclNum, routeMapNum, seqNum, prefix, wildcard, neighborIpAddress, vpnNum)
+    self.send_pushRoute(prefix, vpnNum, neighborIpAddress)
     return self.recv_pushRoute()
 
-  def send_pushRoute(self, aclNum, routeMapNum, seqNum, prefix, wildcard, neighborIpAddress, vpnNum):
+  def send_pushRoute(self, prefix, vpnNum, neighborIpAddress):
     self._oprot.writeMessageBegin('pushRoute', TMessageType.CALL, self._seqid)
     args = pushRoute_args()
-    args.aclNum = aclNum
-    args.routeMapNum = routeMapNum
-    args.seqNum = seqNum
     args.prefix = prefix
-    args.wildcard = wildcard
-    args.neighborIpAddress = neighborIpAddress
     args.vpnNum = vpnNum
+    args.neighborIpAddress = neighborIpAddress
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
@@ -421,25 +401,21 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "pushRoute failed: unknown result");
 
-  def withdrawRoute(self, aclNum, routeMapNum, seqNum, prefix, neighborIpAddress):
+  def withdrawRoute(self, prefix, vpnNum, neighborIpAddress):
     """
     Parameters:
-     - aclNum
-     - routeMapNum
-     - seqNum
      - prefix
+     - vpnNum
      - neighborIpAddress
     """
-    self.send_withdrawRoute(aclNum, routeMapNum, seqNum, prefix, neighborIpAddress)
+    self.send_withdrawRoute(prefix, vpnNum, neighborIpAddress)
     return self.recv_withdrawRoute()
 
-  def send_withdrawRoute(self, aclNum, routeMapNum, seqNum, prefix, neighborIpAddress):
+  def send_withdrawRoute(self, prefix, vpnNum, neighborIpAddress):
     self._oprot.writeMessageBegin('withdrawRoute', TMessageType.CALL, self._seqid)
     args = withdrawRoute_args()
-    args.aclNum = aclNum
-    args.routeMapNum = routeMapNum
-    args.seqNum = seqNum
     args.prefix = prefix
+    args.vpnNum = vpnNum
     args.neighborIpAddress = neighborIpAddress
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
@@ -603,7 +579,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = addRouteMapToMPBGPPeer_result()
-    result.success = self._handler.addRouteMapToMPBGPPeer(args.neighborIpAddress, args.routeMapNumber)
+    result.success = self._handler.addRouteMapToMPBGPPeer(args.neighborIpAddress)
     oprot.writeMessageBegin("addRouteMapToMPBGPPeer", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -614,7 +590,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = deleteRouteMapToMPBGPPeer_result()
-    result.success = self._handler.deleteRouteMapToMPBGPPeer(args.neighborIpAddress, args.routeMapNumber)
+    result.success = self._handler.deleteRouteMapToMPBGPPeer(args.neighborIpAddress)
     oprot.writeMessageBegin("deleteRouteMapToMPBGPPeer", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -647,7 +623,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = pushRoute_result()
-    result.success = self._handler.pushRoute(args.aclNum, args.routeMapNum, args.seqNum, args.prefix, args.wildcard, args.neighborIpAddress, args.vpnNum)
+    result.success = self._handler.pushRoute(args.prefix, args.vpnNum, args.neighborIpAddress)
     oprot.writeMessageBegin("pushRoute", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -658,7 +634,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = withdrawRoute_result()
-    result.success = self._handler.withdrawRoute(args.aclNum, args.routeMapNum, args.seqNum, args.prefix, args.neighborIpAddress)
+    result.success = self._handler.withdrawRoute(args.prefix, args.vpnNum, args.neighborIpAddress)
     oprot.writeMessageBegin("withdrawRoute", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -1211,18 +1187,15 @@ class addRouteMapToMPBGPPeer_args:
   """
   Attributes:
    - neighborIpAddress
-   - routeMapNumber
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'neighborIpAddress', None, None, ), # 1
-    (2, TType.I32, 'routeMapNumber', None, None, ), # 2
   )
 
-  def __init__(self, neighborIpAddress=None, routeMapNumber=None,):
+  def __init__(self, neighborIpAddress=None,):
     self.neighborIpAddress = neighborIpAddress
-    self.routeMapNumber = routeMapNumber
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1238,11 +1211,6 @@ class addRouteMapToMPBGPPeer_args:
           self.neighborIpAddress = iprot.readString();
         else:
           iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.I32:
-          self.routeMapNumber = iprot.readI32();
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1256,10 +1224,6 @@ class addRouteMapToMPBGPPeer_args:
     if self.neighborIpAddress is not None:
       oprot.writeFieldBegin('neighborIpAddress', TType.STRING, 1)
       oprot.writeString(self.neighborIpAddress)
-      oprot.writeFieldEnd()
-    if self.routeMapNumber is not None:
-      oprot.writeFieldBegin('routeMapNumber', TType.I32, 2)
-      oprot.writeI32(self.routeMapNumber)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -1342,18 +1306,15 @@ class deleteRouteMapToMPBGPPeer_args:
   """
   Attributes:
    - neighborIpAddress
-   - routeMapNumber
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'neighborIpAddress', None, None, ), # 1
-    (2, TType.I32, 'routeMapNumber', None, None, ), # 2
   )
 
-  def __init__(self, neighborIpAddress=None, routeMapNumber=None,):
+  def __init__(self, neighborIpAddress=None,):
     self.neighborIpAddress = neighborIpAddress
-    self.routeMapNumber = routeMapNumber
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1369,11 +1330,6 @@ class deleteRouteMapToMPBGPPeer_args:
           self.neighborIpAddress = iprot.readString();
         else:
           iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.I32:
-          self.routeMapNumber = iprot.readI32();
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1387,10 +1343,6 @@ class deleteRouteMapToMPBGPPeer_args:
     if self.neighborIpAddress is not None:
       oprot.writeFieldBegin('neighborIpAddress', TType.STRING, 1)
       oprot.writeString(self.neighborIpAddress)
-      oprot.writeFieldEnd()
-    if self.routeMapNumber is not None:
-      oprot.writeFieldBegin('routeMapNumber', TType.I32, 2)
-      oprot.writeI32(self.routeMapNumber)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -1750,34 +1702,22 @@ class delVrf_result:
 class pushRoute_args:
   """
   Attributes:
-   - aclNum
-   - routeMapNum
-   - seqNum
    - prefix
-   - wildcard
-   - neighborIpAddress
    - vpnNum
+   - neighborIpAddress
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.I32, 'aclNum', None, None, ), # 1
-    (2, TType.I32, 'routeMapNum', None, None, ), # 2
-    (3, TType.I32, 'seqNum', None, None, ), # 3
-    (4, TType.STRING, 'prefix', None, None, ), # 4
-    (5, TType.STRING, 'wildcard', None, None, ), # 5
-    (6, TType.STRING, 'neighborIpAddress', None, None, ), # 6
-    (7, TType.I32, 'vpnNum', None, None, ), # 7
+    (1, TType.STRING, 'prefix', None, None, ), # 1
+    (2, TType.I32, 'vpnNum', None, None, ), # 2
+    (3, TType.STRING, 'neighborIpAddress', None, None, ), # 3
   )
 
-  def __init__(self, aclNum=None, routeMapNum=None, seqNum=None, prefix=None, wildcard=None, neighborIpAddress=None, vpnNum=None,):
-    self.aclNum = aclNum
-    self.routeMapNum = routeMapNum
-    self.seqNum = seqNum
+  def __init__(self, prefix=None, vpnNum=None, neighborIpAddress=None,):
     self.prefix = prefix
-    self.wildcard = wildcard
-    self.neighborIpAddress = neighborIpAddress
     self.vpnNum = vpnNum
+    self.neighborIpAddress = neighborIpAddress
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1789,38 +1729,18 @@ class pushRoute_args:
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.I32:
-          self.aclNum = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.I32:
-          self.routeMapNum = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.I32:
-          self.seqNum = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 4:
         if ftype == TType.STRING:
           self.prefix = iprot.readString();
         else:
           iprot.skip(ftype)
-      elif fid == 5:
-        if ftype == TType.STRING:
-          self.wildcard = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 6:
-        if ftype == TType.STRING:
-          self.neighborIpAddress = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 7:
+      elif fid == 2:
         if ftype == TType.I32:
           self.vpnNum = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.neighborIpAddress = iprot.readString();
         else:
           iprot.skip(ftype)
       else:
@@ -1833,33 +1753,17 @@ class pushRoute_args:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('pushRoute_args')
-    if self.aclNum is not None:
-      oprot.writeFieldBegin('aclNum', TType.I32, 1)
-      oprot.writeI32(self.aclNum)
-      oprot.writeFieldEnd()
-    if self.routeMapNum is not None:
-      oprot.writeFieldBegin('routeMapNum', TType.I32, 2)
-      oprot.writeI32(self.routeMapNum)
-      oprot.writeFieldEnd()
-    if self.seqNum is not None:
-      oprot.writeFieldBegin('seqNum', TType.I32, 3)
-      oprot.writeI32(self.seqNum)
-      oprot.writeFieldEnd()
     if self.prefix is not None:
-      oprot.writeFieldBegin('prefix', TType.STRING, 4)
+      oprot.writeFieldBegin('prefix', TType.STRING, 1)
       oprot.writeString(self.prefix)
       oprot.writeFieldEnd()
-    if self.wildcard is not None:
-      oprot.writeFieldBegin('wildcard', TType.STRING, 5)
-      oprot.writeString(self.wildcard)
+    if self.vpnNum is not None:
+      oprot.writeFieldBegin('vpnNum', TType.I32, 2)
+      oprot.writeI32(self.vpnNum)
       oprot.writeFieldEnd()
     if self.neighborIpAddress is not None:
-      oprot.writeFieldBegin('neighborIpAddress', TType.STRING, 6)
+      oprot.writeFieldBegin('neighborIpAddress', TType.STRING, 3)
       oprot.writeString(self.neighborIpAddress)
-      oprot.writeFieldEnd()
-    if self.vpnNum is not None:
-      oprot.writeFieldBegin('vpnNum', TType.I32, 7)
-      oprot.writeI32(self.vpnNum)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -1941,27 +1845,21 @@ class pushRoute_result:
 class withdrawRoute_args:
   """
   Attributes:
-   - aclNum
-   - routeMapNum
-   - seqNum
    - prefix
+   - vpnNum
    - neighborIpAddress
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.I32, 'aclNum', None, None, ), # 1
-    (2, TType.I32, 'routeMapNum', None, None, ), # 2
-    (3, TType.I32, 'seqNum', None, None, ), # 3
-    (4, TType.STRING, 'prefix', None, None, ), # 4
-    (5, TType.STRING, 'neighborIpAddress', None, None, ), # 5
+    (1, TType.STRING, 'prefix', None, None, ), # 1
+    (2, TType.I32, 'vpnNum', None, None, ), # 2
+    (3, TType.STRING, 'neighborIpAddress', None, None, ), # 3
   )
 
-  def __init__(self, aclNum=None, routeMapNum=None, seqNum=None, prefix=None, neighborIpAddress=None,):
-    self.aclNum = aclNum
-    self.routeMapNum = routeMapNum
-    self.seqNum = seqNum
+  def __init__(self, prefix=None, vpnNum=None, neighborIpAddress=None,):
     self.prefix = prefix
+    self.vpnNum = vpnNum
     self.neighborIpAddress = neighborIpAddress
 
   def read(self, iprot):
@@ -1974,26 +1872,16 @@ class withdrawRoute_args:
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.I32:
-          self.aclNum = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.I32:
-          self.routeMapNum = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.I32:
-          self.seqNum = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 4:
         if ftype == TType.STRING:
           self.prefix = iprot.readString();
         else:
           iprot.skip(ftype)
-      elif fid == 5:
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.vpnNum = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
         if ftype == TType.STRING:
           self.neighborIpAddress = iprot.readString();
         else:
@@ -2008,24 +1896,16 @@ class withdrawRoute_args:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('withdrawRoute_args')
-    if self.aclNum is not None:
-      oprot.writeFieldBegin('aclNum', TType.I32, 1)
-      oprot.writeI32(self.aclNum)
-      oprot.writeFieldEnd()
-    if self.routeMapNum is not None:
-      oprot.writeFieldBegin('routeMapNum', TType.I32, 2)
-      oprot.writeI32(self.routeMapNum)
-      oprot.writeFieldEnd()
-    if self.seqNum is not None:
-      oprot.writeFieldBegin('seqNum', TType.I32, 3)
-      oprot.writeI32(self.seqNum)
-      oprot.writeFieldEnd()
     if self.prefix is not None:
-      oprot.writeFieldBegin('prefix', TType.STRING, 4)
+      oprot.writeFieldBegin('prefix', TType.STRING, 1)
       oprot.writeString(self.prefix)
       oprot.writeFieldEnd()
+    if self.vpnNum is not None:
+      oprot.writeFieldBegin('vpnNum', TType.I32, 2)
+      oprot.writeI32(self.vpnNum)
+      oprot.writeFieldEnd()
     if self.neighborIpAddress is not None:
-      oprot.writeFieldBegin('neighborIpAddress', TType.STRING, 5)
+      oprot.writeFieldBegin('neighborIpAddress', TType.STRING, 3)
       oprot.writeString(self.neighborIpAddress)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
