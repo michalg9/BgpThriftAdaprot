@@ -16,8 +16,10 @@ currentHostname = socket.gethostname()
 
 if currentHostname == 'TN-ODL':
 	neighborIp = '10.3.0.254'
+	asNumber = 65020
 elif currentHostname == 'TS-ODL':
 	neighborIp = '10.2.0.254'
+	asNumber = 65030
 
 
 
@@ -33,12 +35,17 @@ class BgpHandler:
 	neighbourToRouteMap = dict()
 	nextRouteMapNum = 1
 
+	#TODO only a temporary solution because we do not call addRouteMap yet
+	neighbourToRouteMap[neighborIp] = nextRouteMapNum
+
 	# keys = (perfixn, vlan), values - acl (and seq) num
 	siteToAccessList = dict()
 	nextAclNum = 1
 
 	def __init__(self):
 		self.log = {}
+		#TODO only a temporary solution because we do not call startBgpServer yet
+		self.asNumber = asNumber
 
 	def connectTelnet(self, host, port):
 		self.tn = Telnet(host, port)
@@ -115,8 +122,8 @@ class BgpHandler:
 		print "add RouteMap To Peer: " + str(neighborIp) + ", route-map number " + str(
 			routeMapNumber) + "direction " + routeMapDir
 
-		neighbourToRouteMap[neighborIp] = self.nextRouteMapNum;
-		self.nextRouteMapNum = self.nextRouteMapNum + 1;
+		neighbourToRouteMap[neighborIp] = self.nextRouteMapNum
+		self.nextRouteMapNum = self.nextRouteMapNum + 1
 		routeMapNumber = neighbourToRouteMap[neighborIp]
 
 		self.connectTelnet(self.host, self.port)
@@ -168,20 +175,20 @@ class BgpHandler:
 	def pushRoute(self, prefix, wildcard, vpnNum, neighborIp):
 		# TODO this has to be derived as next available one !
 		print "push route prefix:" + str(prefix)
+		#TODO: convert prefix length to wildcard
+		self.siteToAccessList[(prefix, vpnNum)] = self.nextAclNum
+		self.nextAclNum = self.nextAclNum + 1 #TODO some recycling is needed: recall standard acl numbers range is 1-99
+		aclNum = self.siteToAccessList[(prefix, vpnNum)]
+		seqNum = self.siteToAccessList[(prefix, vpnNum)]
 
-		siteToAccessList[(prefix, vpnNum)] = self.nextAclNum;
-		self.nextAclNum = self.nextAclNum + 1;
-		aclNum = siteToAccessList[(prefix, vpnNum)]
-		seqNum = siteToAccessList[(prefix, vpnNum)]
-
-		routeMapNumber = neighbourToRouteMap[neighborIp]
+		routeMapNumber = self.neighbourToRouteMap[neighborIp]
 
 		self.connectTelnet(self.host, self.port)
 		print self.execTelnetCommand('conf t')
 		print self.execTelnetCommand('access-list ' + str(aclNum) + ' permit ' + prefix + ' ' + wildcard)
-		print self.execTelnetCommand('route-map ' + str(routeMapNum) + ' permit ' + str(seqNum))
+		print self.execTelnetCommand('route-map ' + str(routeMapNumber) + ' permit ' + str(seqNum))
 		print self.execTelnetCommand('match ip address ' + str(aclNum))
-		print self.execTelnetCommand('set extcommunity rt ' + self.asNumber + ':' + str(vpnNum)) #we do not give originator AS but its BGP provider AS
+		print self.execTelnetCommand('set extcommunity rt ' + str(self.asNumber) + ':' + str(vpnNum)) #we do not give originator AS but its BGP provider AS
 		print self.execTelnetCommand('end')
 		print self.execTelnetCommand('clear ip bgp ' + neighborIp + ' vpnv4 unicast out')
 		# TODO consider alternative solution: peer group
@@ -192,19 +199,18 @@ class BgpHandler:
 		return 0
 
 	def withdrawRoute(self, prefix, vpnNum, neighborIp):
-		# TODO find appropriate seqNum using prefix
 		print "withdrawRoute prefix " + str(prefix)
-		
-		aclNum = siteToAccessList[(prefix, vpnNum)]
-		seqNum = siteToAccessList[(prefix, vpnNum)]
-		siteToAccessList.pop((prefix, vpnNum), None)
+		#TODO: what if key is missing?
+		aclNum = self.siteToAccessList[(prefix, vpnNum)]
+		seqNum = self.siteToAccessList[(prefix, vpnNum)]
+		self.siteToAccessList.pop((prefix, vpnNum), None)
 
-		routeMapNumber = neighbourToRouteMap[neighborIp]
+		routeMapNumber = self.neighbourToRouteMap[neighborIp]
 
 		self.connectTelnet(self.host, self.port)
 		print self.execTelnetCommand('conf t')
 		print self.execTelnetCommand('no access-list ' + str(aclNum))
-		print self.execTelnetCommand('no route-map ' + str(routeMapNum) + ' permit ' + str(seqNum))
+		print self.execTelnetCommand('no route-map ' + str(routeMapNumber) + ' permit ' + str(seqNum))
 		print self.execTelnetCommand('end')
 		print self.execTelnetCommand('clear ip bgp ' + neighborIp + ' vpnv4 unicast out')
 		# TODO consider alternative solution: peer group
@@ -459,12 +465,16 @@ handler = BgpHandler()
 #handler.getRouteTarget('10.3.1.0/24') # rt 101
 #handler.getRouteTarget('10.5.2.0/24') #no net
 
-processor = BgpConfigurator.Processor(handler)
-transport = TSocket.TServerSocket(port=7644)
-tfactory = TTransport.TBufferedTransportFactory()
-pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+handler.pushRoute('10.2.2.0', '0.0.0.255', 102, neighborIp)
+print "checking..."
+# BUG key error
+handler.withdrawRoute('10.2.2.0/24', 102, neighborIp) #TODO inconsistency in format: we should stick to prefix and calculate wildcard needed for push route
+#processor = BgpConfigurator.Processor(handler)
+#transport = TSocket.TServerSocket(port=7644)
+#tfactory = TTransport.TBufferedTransportFactory()
+#pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-print "Starting python server..."
-server.serve()
+#server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+#print "Starting python server..."
+#server.serve()
 print "done!"
