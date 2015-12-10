@@ -39,8 +39,11 @@ class BgpHandler:
 	neighbourToRouteMap[neighborIp] = nextRouteMapNum
 
 	# keys = (perfixn, vlan), values - acl (and seq) num
-	siteToAccessList = dict()
-	nextAclNum = 1
+	#siteToAccessList = dict()
+	siteToPrefixList = dict()
+
+	#nextAclNum = 1
+	nextPrefixListNum = 1
 
 	def __init__(self):
 		self.log = {}
@@ -172,22 +175,27 @@ class BgpHandler:
 		print "del vrf rd:" + str(rd)
 		return 0
 
-	def pushRoute(self, prefix, wildcard, vpnNum, neighborIp):
+	def pushRoute(self, prefix, vpnNum, neighborIp): #prefix format 10.2.1.0/24, no wildcard anymore
 		# TODO this has to be derived as next available one !
 		print "push route prefix:" + str(prefix)
 		#TODO: convert prefix length to wildcard
-		self.siteToAccessList[(prefix, vpnNum)] = self.nextAclNum
-		self.nextAclNum = self.nextAclNum + 1 #TODO some recycling is needed: recall standard acl numbers range is 1-99
-		aclNum = self.siteToAccessList[(prefix, vpnNum)]
-		seqNum = self.siteToAccessList[(prefix, vpnNum)]
+		self.siteToPrefixList[(prefix, vpnNum)] = self.nextPrefixListNum
+		self.nextPrefixListNum = self.nextPrefixListNum + 1 #TODO some recycling is needed: recall standard acl numbers range is 1-99
+		#aclNum = self.siteToAccessList[(prefix, vpnNum)]
+		prefixListNum = self.siteToPrefixList[(prefix, vpnNum)]
+		seqNum = self.siteToPrefixList[(prefix, vpnNum)]
 
 		routeMapNumber = self.neighbourToRouteMap[neighborIp]
 
 		self.connectTelnet(self.host, self.port)
 		print self.execTelnetCommand('conf t')
-		print self.execTelnetCommand('access-list ' + str(aclNum) + ' permit ' + prefix + ' ' + wildcard)
+		#ip prefix-list 1 permit 10.2.1.0/24
+		#match ip address prefix-list 1
+		#replaced with prefix-list print self.execTelnetCommand('access-list ' + str(aclNum) + ' permit ' + prefix + ' ' + wildcard)
+		print self.execTelnetCommand('ip prefix-list ' + str(prefixListNum) + ' permit ' + prefix)
 		print self.execTelnetCommand('route-map ' + str(routeMapNumber) + ' permit ' + str(seqNum))
-		print self.execTelnetCommand('match ip address ' + str(aclNum))
+		#print self.execTelnetCommand('match ip address ' + str(aclNum))
+		print self.execTelnetCommand('match ip address prefix-list  ' + str(prefixListNum))
 		print self.execTelnetCommand('set extcommunity rt ' + str(self.asNumber) + ':' + str(vpnNum)) #we do not give originator AS but its BGP provider AS
 		print self.execTelnetCommand('end')
 		print self.execTelnetCommand('clear ip bgp ' + neighborIp + ' vpnv4 unicast out')
@@ -201,15 +209,17 @@ class BgpHandler:
 	def withdrawRoute(self, prefix, vpnNum, neighborIp):
 		print "withdrawRoute prefix " + str(prefix)
 		#TODO: what if key is missing?
-		aclNum = self.siteToAccessList[(prefix, vpnNum)]
-		seqNum = self.siteToAccessList[(prefix, vpnNum)]
-		self.siteToAccessList.pop((prefix, vpnNum), None)
+		#aclNum = self.siteToAccessList[(prefix, vpnNum)]
+		prefixListNum = self.siteToPrefixList[(prefix, vpnNum)]
+		seqNum = self.siteToPrefixList[(prefix, vpnNum)]
+		self.siteToPrefixList.pop((prefix, vpnNum), None)
 
 		routeMapNumber = self.neighbourToRouteMap[neighborIp]
 
 		self.connectTelnet(self.host, self.port)
 		print self.execTelnetCommand('conf t')
-		print self.execTelnetCommand('no access-list ' + str(aclNum))
+		#print self.execTelnetCommand('no access-list ' + str(aclNum))
+		print self.execTelnetCommand('no ip prefix-list ' + str(prefixListNum))
 		print self.execTelnetCommand('no route-map ' + str(routeMapNumber) + ' permit ' + str(seqNum))
 		print self.execTelnetCommand('end')
 		print self.execTelnetCommand('clear ip bgp ' + neighborIp + ' vpnv4 unicast out')
@@ -460,21 +470,27 @@ class BgpHandler:
 
 
 handler = BgpHandler()
-#quicktests
+#route target quicktests
 #handler.getRouteTarget('10.2.2.0/24') #not found:prefix exists no rt, return empty string
 #handler.getRouteTarget('10.3.1.0/24') # rt 101
 #handler.getRouteTarget('10.5.2.0/24') #no net
 
-handler.pushRoute('10.2.2.0', '0.0.0.255', 102, neighborIp)
-print "checking..."
-# BUG key error
-handler.withdrawRoute('10.2.2.0/24', 102, neighborIp) #TODO inconsistency in format: we should stick to prefix and calculate wildcard needed for push route
-#processor = BgpConfigurator.Processor(handler)
-#transport = TSocket.TServerSocket(port=7644)
-#tfactory = TTransport.TBufferedTransportFactory()
-#pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+#route target quicktests
+# handler.pushRoute('10.2.2.0/24', 102, neighborIp)
+# print "checking..."
+# handler.pushRoute('10.2.1.0/24', 102, neighborIp)
+# print "checking..."
+# handler.withdrawRoute('10.2.1.0/24', 102, neighborIp)
+# print "checking..."
+# handler.withdrawRoute('10.2.2.0/24', 102, neighborIp)
+# print "checking..."
 
-#server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-#print "Starting python server..."
-#server.serve()
+processor = BgpConfigurator.Processor(handler)
+transport = TSocket.TServerSocket(port=7644)
+tfactory = TTransport.TBufferedTransportFactory()
+pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+
+server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+print "Starting python server..."
+server.serve()
 print "done!"
