@@ -35,8 +35,8 @@ class BgpHandler:
 	neighbourToRouteMap = dict()
 	nextRouteMapNum = 1
 
-	#TODO only a temporary solution because we do not call addRouteMap yet
-	neighbourToRouteMap[neighborIp] = nextRouteMapNum
+	#TODO use only if we do not call addRouteMapToMPBGPPeer yet
+	#neighbourToRouteMap[neighborIp] = nextRouteMapNum
 
 	# keys = (perfixn, vlan), values - acl (and seq) num
 	#siteToAccessList = dict()
@@ -101,6 +101,7 @@ class BgpHandler:
 		print self.execTelnetCommand('conf t')
 		print self.execTelnetCommand('router bgp ' + str(self.asNumber))
 		print self.execTelnetCommand('neighbor ' + str(neighborIp) + ' remote-as ' + str(asNumber))
+		print self.execTelnetCommand('address-family vpn4')
 		print self.execTelnetCommand('neighbor ' + str(neighborIp) + ' activate')
 		print self.execTelnetCommand('end')
 		self.closeTelnet()
@@ -122,20 +123,23 @@ class BgpHandler:
 	def addRouteMapToMPBGPPeer(self, neighborIp):
 		routeMapDir='out'
 
+
+		self.neighbourToRouteMap[neighborIp] = self.nextRouteMapNum
+		self.nextRouteMapNum = self.nextRouteMapNum + 1
+		routeMapNumber = self.neighbourToRouteMap[neighborIp]
+
 		print "add RouteMap To Peer: " + str(neighborIp) + ", route-map number " + str(
 			routeMapNumber) + "direction " + routeMapDir
-
-		neighbourToRouteMap[neighborIp] = self.nextRouteMapNum
-		self.nextRouteMapNum = self.nextRouteMapNum + 1
-		routeMapNumber = neighbourToRouteMap[neighborIp]
 
 		self.connectTelnet(self.host, self.port)
 		print self.execTelnetCommand('conf t')
 		print self.execTelnetCommand('router bgp ' + str(self.asNumber))
-		print self.execTelnetCommand('address-family vpn4')
+		print self.execTelnetCommand('address-family vpnv4')
 		print self.execTelnetCommand(
 			'neighbor ' + str(neighborIp) + ' route-map ' + str(routeMapNumber) + ' ' + routeMapDir)
 		print self.execTelnetCommand('end')
+		print self.execTelnetCommand('clear ip bgp ' + neighborIp + ' vpnv4 unicast out')
+
 		self.closeTelnet()
 
 		return 0
@@ -143,19 +147,22 @@ class BgpHandler:
 	def deleteRouteMapToMPBGPPeer(self, neighborIp):
 		routeMapDir='out'
 
+
+		routeMapNumber = self.neighbourToRouteMap[neighborIp]
+		self.neighbourToRouteMap.pop(neighborIp, None)
+
 		print "delete RouteMap To Peer: " + str(neighborIp) + ", route-map number " + str(
-			routeMapNumber) + "direction " + routeMapDir
-		
-		routeMapNumber = neighbourToRouteMap[neighborIp]
-		neighbourToRouteMap.pop(neighborIp, None)
+			routeMapNumber) + " direction " + routeMapDir
 
 		self.connectTelnet(self.host, self.port)
 		print self.execTelnetCommand('conf t')
 		print self.execTelnetCommand('router bgp ' + str(self.asNumber))
-		print self.execTelnetCommand('address-family vpn4')
+		print self.execTelnetCommand('address-family vpnv4')
 		print self.execTelnetCommand(
 			'no neighbor ' + str(neighborIp) + ' route-map ' + str(routeMapNumber) + ' ' + routeMapDir)
 		print self.execTelnetCommand('end')
+		print self.execTelnetCommand('clear ip bgp ' + neighborIp + ' vpnv4 unicast out')
+
 		self.closeTelnet()
 
 		return 0
@@ -176,12 +183,11 @@ class BgpHandler:
 		return 0
 
 	def pushRoute(self, prefix, vpnNum, neighborIp): #prefix format 10.2.1.0/24, no wildcard anymore
-		# TODO this has to be derived as next available one !
 		print "push route prefix:" + str(prefix)
-		#TODO: convert prefix length to wildcard
 		self.siteToPrefixList[(prefix, vpnNum)] = self.nextPrefixListNum
-		self.nextPrefixListNum = self.nextPrefixListNum + 1 #TODO some recycling is needed: recall standard acl numbers range is 1-99
 		#aclNum = self.siteToAccessList[(prefix, vpnNum)]
+		#TODO check if some recycling is needed: recall standard acl numbers range is 1-99, here we have WORD
+		self.nextPrefixListNum = self.nextPrefixListNum + 1
 		prefixListNum = self.siteToPrefixList[(prefix, vpnNum)]
 		seqNum = self.siteToPrefixList[(prefix, vpnNum)]
 
@@ -475,7 +481,9 @@ handler = BgpHandler()
 #handler.getRouteTarget('10.3.1.0/24') # rt 101
 #handler.getRouteTarget('10.5.2.0/24') #no net
 
-#route target quicktests
+# add/delete route  quicktests
+#handler.addRouteMapToMPBGPPeer(neighborIp)
+#print "checking..."
 # handler.pushRoute('10.2.2.0/24', 102, neighborIp)
 # print "checking..."
 # handler.pushRoute('10.2.1.0/24', 102, neighborIp)
@@ -484,6 +492,8 @@ handler = BgpHandler()
 # print "checking..."
 # handler.withdrawRoute('10.2.2.0/24', 102, neighborIp)
 # print "checking..."
+#handler.deleteRouteMapToMPBGPPeer(neighborIp)
+#print "checking..."
 
 processor = BgpConfigurator.Processor(handler)
 transport = TSocket.TServerSocket(port=7644)
