@@ -21,14 +21,14 @@ service BgpConfigurator {
     i32 stopBgpServer(),
     i32 createPeer(1:string neighborIpAddress, 2:i32 asNumber),
     i32 deletePeer(1:string neighborIpAddress),
-    i32 addRouteMapToMPBGPPeer(1:string neighborIpAddress, 2:i32 routeMapNumber),
-    i32 deleteRouteMapToMPBGPPeer(1:string neighborIpAddress, 2:i32 routeMapNumber),
+	i32 addRouteMapToMPBGPPeer(1:string neighborIpAddress),
+	i32 deleteRouteMapToMPBGPPeer(1:string neighborIpAddress),
     i32 addVrf(1:string rd, 2:list<string> irts, 3:list<string> erts),
     i32 delVrf(1:string rd),
-    i32 pushRoute(1:i32 aclNum, 2:i32 routeMapNum, 3:i32 seqNum, 4:string prefix, 5:string wildcard, 6:string neighborIpAddress, 7:i32 vpnNum),
-    i32 withdrawRoute(1:i32 aclNum, 2:i32 routeMapNum, 3:i32 seqNum, 4:string prefix, 5:string neighborIpAddress),
+	i32 pushRoute(1:string prefix, 2:i32 vpnNum, 3:string neighborIpAddress),
+	i32 withdrawRoute(1:string prefix, 2:i32 vpnNum, 3:string neighborIpAddress),
     Routes getRoutes(1:i32 optype, 2:i32 winSize),
-    string getRouteTarget(1:string prefix)
+	string getRouteTarget(1:string prefix)
 }
 
 service BgpUpdater {
